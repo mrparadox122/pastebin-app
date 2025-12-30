@@ -18,6 +18,7 @@ A simple Pastebin clone that allows users to create and share text pastes with o
 
 ### Installation & Running
 
+
 1. Install dependencies:
 ```bash
 npm install
