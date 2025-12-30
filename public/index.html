@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Paste</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 700px;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 200px;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .constraints {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .hint {
+            color: #888;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #fcc;
+            display: none;
+        }
+        
+        .success {
+            background: #efe;
+            color: #3c3;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border: 1px solid #cfc;
+            display: none;
+        }
+        
+        .success-url {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .success-url input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #9f9;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .copy-btn {
+            padding: 10px 20px;
+            background: #3c3;
+            width: auto;
+        }
+        
+        .copy-btn:hover {
+            background: #2b2;
+        }
+        
+        @media (max-width: 600px) {
+            .constraints {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Create Paste</h1>
+        <p class="subtitle">Share text snippets with optional expiry and view limits</p>
+        
+        <div class="error" id="error"></div>
+        
+        <form id="pasteForm">
+            <div class="form-group">
+                <label for="content">Content *</label>
+                <textarea id="content" placeholder="Paste your text here..." required></textarea>
+            </div>
+            
+            <div class="constraints">
+                <div class="form-group">
+                    <label for="ttl">Expire After (seconds)</label>
+                    <input type="number" id="ttl" min="1" placeholder="Optional">
+                    <div class="hint">Leave empty for no expiry</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="maxViews">Max Views</label>
+                    <input type="number" id="maxViews" min="1" placeholder="Optional">
+                    <div class="hint">Leave empty for unlimited</div>
+                </div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Create Paste</button>
+        </form>
+        
+        <div class="success" id="success">
+            <strong>✅ Paste created successfully!</strong>
+            <div class="success-url">
+                <input type="text" id="pasteUrl" readonly>
+                <button class="copy-btn" onclick="copyUrl()">Copy</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('pasteForm');
+        const errorDiv = document.getElementById('error');
+        const successDiv = document.getElementById('success');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+            
+            const content = document.getElementById('content').value;
+            const ttl = document.getElementById('ttl').value;
+            const maxViews = document.getElementById('maxViews').value;
+            
+            const body = { content };
+            if (ttl) body.ttl_seconds = parseInt(ttl, 10);
+            if (maxViews) body.max_views = parseInt(maxViews, 10);
+            
+            try {
+                const response = await fetch('/api/pastes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to create paste');
+                }
+                
+                document.getElementById('pasteUrl').value = data.url;
+                successDiv.style.display = 'block';
+                form.reset();
+                
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Paste';
+            }
+        });
+        
+        function copyUrl() {
+            const urlInput = document.getElementById('pasteUrl');
+            urlInput.select();
+            document.execCommand('copy');
+            
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

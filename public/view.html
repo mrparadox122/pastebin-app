@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Paste</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .header {
+            max-width: 900px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        
+        .logo:hover {
+            opacity: 0.8;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .error h2 {
+            color: #c33;
+            margin-bottom: 10px;
+        }
+        
+        .error p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .paste-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .paste-title {
+            color: #333;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .paste-meta {
+            display: flex;
+            gap: 20px;
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeaa7;
+            font-size: 14px;
+        }
+        
+        .content-wrapper {
+            position: relative;
+        }
+        
+        .copy-btn-top {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background 0.2s;
+            z-index: 10;
+        }
+        
+        .copy-btn-top:hover {
+            background: #5568d3;
+        }
+        
+        .paste-content {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 600px;
+            overflow-y: auto;
+            color: #333;
+        }
+        
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-secondary {
+            padding: 12px 24px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="logo">📋 Pastebin</a>
+    </div>
+    
+    <div class="container">
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading paste...</p>
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <div class="error-icon">❌</div>
+            <h2>Paste Not Found</h2>
+            <p id="errorMessage">This paste doesn't exist or has expired.</p>
+            <a href="/" class="btn">Create New Paste</a>
+        </div>
+        
+        <div id="content" style="display: none;">
+            <div class="paste-header">
+                <h1 class="paste-title">Paste</h1>
+                <div class="paste-meta" id="metadata"></div>
+            </div>
+            
+            <div id="warningDiv"></div>
+            
+            <div class="content-wrapper">
+                <button class="copy-btn-top" onclick="copyContent()">Copy</button>
+                <pre class="paste-content" id="pasteContent"></pre>
+            </div>
+            
+            <div class="actions">
+                <a href="/" class="btn">Create New Paste</a>
+                <button class="btn-secondary" onclick="copyContent()">Copy Content</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadPaste() {
+            const pathParts = window.location.pathname.split('/');
+            const pasteId = pathParts[pathParts.length - 1];
+            
+            try {
+                const response = await fetch(`/api/pastes/${pasteId}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to load paste');
+                }
+                
+                // Hide loading, show content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                
+                // Display content
+                document.getElementById('pasteContent').textContent = data.content;
+                
+                // Display metadata
+                const metadata = document.getElementById('metadata');
+                const createdDate = new Date(data.created_at).toLocaleString();
+                
+                let metaHtml = `<div class="meta-item">📅 ${createdDate}</div>`;
+                
+                if (data.expires_at) {
+                    const expiresDate = new Date(data.expires_at).toLocaleString();
+                    metaHtml += `<div class="meta-item">⏰ Expires: ${expiresDate}</div>`;
+                }
+                
+                if (data.views_remaining !== null) {
+                    metaHtml += `<div class="meta-item">👁️ Views left: ${data.views_remaining}</div>`;
+                }
+                
+                metadata.innerHTML = metaHtml;
+                
+                // Show warning if paste is about to expire
+                const warningDiv = document.getElementById('warningDiv');
+                if (data.views_remaining !== null && data.views_remaining <= 2) {
+                    warningDiv.innerHTML = `<div class="warning">⚠️ This paste will be deleted after ${data.views_remaining} more view${data.views_remaining !== 1 ? 's' : ''}!</div>`;
+                }
+                
+                if (data.expires_at) {
+                    const timeLeft = data.expires_at - Date.now();
+                    if (timeLeft > 0 && timeLeft < 300000) { // Less than 5 minutes
+                        const minutesLeft = Math.ceil(timeLeft / 60000);
+                        warningDiv.innerHTML += `<div class="warning">⏳ This paste will expire in approximately ${minutesLeft} minute${minutesLeft !== 1 ? 's' : ''}!</div>`;
+                    }
+                }
+                
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('errorMessage').textContent = error.message;
+            }
+        }
+        
+        function copyContent() {
+            const content = document.getElementById('pasteContent').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                const btns = document.querySelectorAll('.copy-btn-top, .btn-secondary');
+                btns.forEach(btn => {
+                    if (btn.textContent.includes('Copy')) {
+                        const originalText = btn.textContent;
+                        btn.textContent = '✓ Copied!';
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                        }, 2000);
+                    }
+                });
+            });
+        }
+        
+        // Load paste on page load
+        loadPaste();
+    </script>
+</body>
+</html>
