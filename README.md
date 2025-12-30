@@ -30,7 +30,7 @@ npm start
 
 3. Open your browser to:
 ```
-http://localhost:3000
+https://pastebin-black.vercel.app/
 ```
 
 The server runs on port 3000 by default (configurable via `PORT` environment variable).
@@ -109,7 +109,7 @@ Body:
 Response (201):
 {
   "id": "uuid",
-  "url": "http://localhost:3000/p/uuid"
+  "url": "https://pastebin-black.vercel.app/p/uuid"
 }
 ```
 
@@ -135,12 +135,12 @@ The application supports the `x-test-now-ms` header for testing time-based expir
 
 ```bash
 # Create a paste that expires in 10 seconds
-curl -X POST http://localhost:3000/api/pastes \
+curl -X POST https://pastebin-black.vercel.app/api/pastes \
   -H "Content-Type: application/json" \
   -d '{"content":"test","ttl_seconds":10}'
 
 # Test with a future timestamp (11 seconds later)
-curl http://localhost:3000/api/pastes/:id \
+curl https://pastebin-black.vercel.app/api/pastes/:id \
   -H "x-test-now-ms: $(($(date +%s)*1000 + 11000))"
 ```
 
